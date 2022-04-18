@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection.Metadata;
-using ArturBhasker.TerralinkTestProject.Helpers;
+using ArturBhasker.TerralinkTestProject.Extensions;
 
 namespace ArturBhasker.TerralinkTestProject.Services
 {
@@ -60,8 +60,8 @@ namespace ArturBhasker.TerralinkTestProject.Services
 
         public void Dispose()
         {
-            _cts.Cancel();
             _documentItemsQueue.Clear();
+            _cts.Cancel();
         }
     }
 }

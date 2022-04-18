@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
 
-namespace ArturBhasker.TerralinkTestProject.Helpers
+namespace ArturBhasker.TerralinkTestProject.Extensions
 {
-    internal static class DocumentConcurrentHelper
+    internal static class DocumentConcurrentExtensions
     {
         public static IEnumerable<T> DequeueList<T>(this ConcurrentQueue<T> queue, int count) where T : struct
         {

@@ -20,8 +20,9 @@ public sealed class ExternalSystemConnector
     {
         if (documents.Count > 10)
         {
-            throw new ArgumentException("Can't send more than 10 documents at once.", nameof
-                (documents));
+            throw new ArgumentException("Can't send more than 10 documents at once.",
+                nameof(documents)
+            );
         }
 
         // тестовая реализация, просто ничего не делаем 2 секунды
