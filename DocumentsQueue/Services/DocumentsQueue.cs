@@ -33,14 +33,14 @@ namespace ArturBhasker.TerralinkTestProject.Services
         {
             var documentSendTimer = new System.Timers.Timer(SendIntervalInMilliseconds);
 
-            documentSendTimer.Elapsed += async (sender, e) => await EnqueueMessages(this, cancellationToken);
+            documentSendTimer.Elapsed += async (sender, e) => await SendMessagesAsync(this, cancellationToken);
             documentSendTimer.AutoReset = true;
             documentSendTimer.Enabled = true;
 
             documentSendTimer.Start();
         }
 
-        private static async Task EnqueueMessages(
+        private static async Task SendMessagesAsync(
             DocumentsQueue documentsQueue,
             CancellationToken cancellationToken
         )
