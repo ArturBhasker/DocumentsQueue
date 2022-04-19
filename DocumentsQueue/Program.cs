@@ -2,7 +2,10 @@
 using ArturBhasker.TerralinkTestProject.Services;
 
 var externalSystemConnector = new ExternalSystemConnector();
-using var documentsQueue = new DocumentsQueue(externalSystemConnector);
+using var cancellationTokenSource = new CancellationTokenSource();
+using var documentsQueue = new DocumentsQueue(
+    externalSystemConnector: externalSystemConnector,
+    cancellationTokenSource: cancellationTokenSource);
 
 //Отправим 100 документов для проверки
 for (int i = 0; i < 100; i++)

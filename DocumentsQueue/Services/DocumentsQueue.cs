@@ -7,20 +7,23 @@ namespace ArturBhasker.TerralinkTestProject.Services
     internal class DocumentsQueue : IDocumentsQueue, IDisposable
     {
         private const int SendIntervalInMilliseconds = 5000;
+        private const int MaxDocumentsCount = 10;
 
         private readonly ConcurrentQueue<Document> _documentItemsQueue = new();
         private readonly ExternalSystemConnector _externalSystemConnector;
-        private readonly CancellationTokenSource _cts;
+        private readonly CancellationTokenSource _cancellationTokenSource;
+
+        private System.Timers.Timer? DocumentSendTimer { get; set; }
 
         public DocumentsQueue(
-            ExternalSystemConnector externalSystemConnector
+            ExternalSystemConnector externalSystemConnector,
+            CancellationTokenSource cancellationTokenSource
         )
         {
-            _externalSystemConnector = externalSystemConnector;
+            _externalSystemConnector = externalSystemConnector ?? throw new ArgumentNullException(nameof(externalSystemConnector));
+            _cancellationTokenSource = cancellationTokenSource ?? throw new ArgumentNullException(nameof(cancellationTokenSource));
 
-            _cts = new CancellationTokenSource();
-
-            SetDocumentQueueTimer(_cts.Token);
+            SetDocumentQueueTimer(_cancellationTokenSource.Token);
         }
 
         public void Enqueue(Document document)
@@ -31,13 +34,13 @@ namespace ArturBhasker.TerralinkTestProject.Services
         private void SetDocumentQueueTimer(
             CancellationToken cancellationToken)
         {
-            var documentSendTimer = new System.Timers.Timer(SendIntervalInMilliseconds);
+            DocumentSendTimer = new System.Timers.Timer(SendIntervalInMilliseconds);
 
-            documentSendTimer.Elapsed += async (sender, e) => await SendMessagesAsync(this, cancellationToken);
-            documentSendTimer.AutoReset = true;
-            documentSendTimer.Enabled = true;
+            DocumentSendTimer.Elapsed += async (sender, e) => await SendMessagesAsync(this, cancellationToken);
+            DocumentSendTimer.AutoReset = true;
+            DocumentSendTimer.Enabled = true;
 
-            documentSendTimer.Start();
+            DocumentSendTimer.Start();
         }
 
         private static async Task SendMessagesAsync(
@@ -45,23 +48,30 @@ namespace ArturBhasker.TerralinkTestProject.Services
             CancellationToken cancellationToken
         )
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
             if (documentsQueue._documentItemsQueue.Any())
             {
                 var documentsList = documentsQueue._documentItemsQueue
-                    .DequeueList(10)
+                    .DequeueList(MaxDocumentsCount)
                     .ToList();
 
                 await
                     Task.Run(
                         async () => await documentsQueue._externalSystemConnector.SendDocument(documentsList),
-                        cancellationToken);
+                        cancellationToken
+                    );
             }
         }
 
         public void Dispose()
         {
+            DocumentSendTimer?.Stop();
             _documentItemsQueue.Clear();
-            _cts.Cancel();
+            _cancellationTokenSource.Cancel();
         }
     }
 }
