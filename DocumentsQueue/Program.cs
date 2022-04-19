@@ -5,7 +5,11 @@ var externalSystemConnector = new ExternalSystemConnector();
 using var cancellationTokenSource = new CancellationTokenSource();
 using var documentsQueue = new DocumentsQueue(
     externalSystemConnector: externalSystemConnector,
-    cancellationTokenSource: cancellationTokenSource);
+    cancellationTokenSource: cancellationTokenSource
+);
+
+
+documentsQueue.SetDocumentQueueTimer(cancellationTokenSource.Token);
 
 //Отправим 100 документов для проверки
 for (int i = 0; i < 100; i++)

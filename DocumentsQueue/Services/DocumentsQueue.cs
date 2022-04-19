@@ -22,8 +22,6 @@ namespace ArturBhasker.TerralinkTestProject.Services
         {
             _externalSystemConnector = externalSystemConnector ?? throw new ArgumentNullException(nameof(externalSystemConnector));
             _cancellationTokenSource = cancellationTokenSource ?? throw new ArgumentNullException(nameof(cancellationTokenSource));
-
-            SetDocumentQueueTimer(_cancellationTokenSource.Token);
         }
 
         public void Enqueue(Document document)
@@ -31,7 +29,7 @@ namespace ArturBhasker.TerralinkTestProject.Services
             _documentItemsQueue.Enqueue(document);
         }
 
-        private void SetDocumentQueueTimer(
+        public void SetDocumentQueueTimer(
             CancellationToken cancellationToken)
         {
             DocumentSendTimer = new System.Timers.Timer(SendIntervalInMilliseconds);
